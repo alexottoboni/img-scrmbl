@@ -16,11 +16,11 @@ class ImageScrambler:
     def __repr__(self):
         return str(self.img)
 
-    def write_img(self):
+    def write(self, location = './altered_img.jpeg'):
         """
             Writes the current image to a file called
         """
-        img_file = open('./altered_img.jpeg', 'w+')
+        img_file = open(location, 'w+')
         self.img.save(img_file)        
 
     def get_pixel_list(self):
@@ -39,8 +39,28 @@ class ImageScrambler:
    
     def scramble(self):
         """
-
+        
         """
+        new_pixel_values = []
+        pixel_values = self.get_pixel_list()
+        for i in range(0, len(pixel_values), 2):
+            if (i == len(pixel_values) - 1):
+                new_pixel_values.append(pixel_values[i])
+            else:
+                curR = pixel_values[i][0]
+                curG = pixel_values[i][1]
+                curB = pixel_values[i][2]
+            
+                nextR = pixel_values[i+1][0]
+                nextG = pixel_values[i+1][1]
+                nextB = pixel_values[i+1][2]
+            
+                new_pixel_values.append((nextR, nextG, nextB))
+                new_pixel_values.append((curR, curG, curB))
+
+        self.img = Image.new(self.img.mode, self.img.size)
+        self.img.putdata(new_pixel_values)
+            
         return None    
        
     def unscramble(self):
@@ -58,7 +78,6 @@ class ImageScrambler:
             pixel_values[i] = (255,255,255)
         self.img = Image.new(self.img.mode, self.img.size)
         self.img.putdata(pixel_values)
-        self.write_img()
         return None
 
     def make_black(self):
@@ -70,7 +89,6 @@ class ImageScrambler:
             pixel_values[i] = (0,0,0)
         self.img = Image.new(self.img.mode, self.img.size)
         self.img.putdata(pixel_values)
-        self.write_img()
         return None
 
     def increase_color(self, color_value):
@@ -89,8 +107,7 @@ class ImageScrambler:
                 print "Not a valid color value"
             pixel_values[i] = (r_value, g_value, b_value)
         self.img = Image.new(self.img.mode, self.img.size)
-        self.img.putdata(pixel_values)
-        self.write_img()   
+        self.img.putdata(pixel_values)   
         return None
 
     def blur(self):
@@ -98,7 +115,13 @@ class ImageScrambler:
 
 if __name__ == "__main__":
 
+    if len(sys.argv) == 1:
+         my_image = Image.open('my_image.jpg', 'r')
+    elif len(sys.argv) == 2:
+        my_image = Image.open(sys.argv[1])
+    else:
+        raise ValueError()
     my_image = Image.open('my_image.jpg', 'r')
     img_scrmbler = ImageScrambler(my_image)
-    img_scrmbler.increase_color("B")
-    img_scrmbler.make_white()
+    img_scrmbler.scramble()
+    img_scrmbler.write()
