@@ -49,6 +49,18 @@ class ImageScrambler:
         """
         return None
     
+    def make_white(self):
+        """
+            Makes every pixel in the image white
+        """
+        pixel_values = self.get_pixel_list()
+        for i in range(len(pixel_values)):
+            pixel_values[i] = (255,255,255)
+        self.img = Image.new(self.img.mode, self.img.size)
+        self.img.putdata(pixel_values)
+        self.write_img()
+        return None
+
     def make_black(self):
         """
             Makes every pixel in the image black
@@ -61,27 +73,32 @@ class ImageScrambler:
         self.write_img()
         return None
 
-    def increase_reds(self):
-        """
-            Increases the value of the reds in the image
-        """    
-        return None
- 
-    def increase_greens(self):
-        """
-            Increases the value of the greens in the image
-        """
+    def increase_color(self, color_value):
+        pixel_values = self.get_pixel_list()
+        for i in range(len(pixel_values)):
+            r_value = pixel_values[i][0]
+            g_value = pixel_values[i][1]
+            b_value = pixel_values[i][2]
+            if (color_value.upper() == 'R'):
+                r_value += 50
+            elif (color_value.upper() == 'G'):
+                g_value += 50
+            elif (color_value.upper() == 'B'):
+                b_value += 50
+            else:
+                print "Not a valid color value"
+            pixel_values[i] = (r_value, g_value, b_value)
+        self.img = Image.new(self.img.mode, self.img.size)
+        self.img.putdata(pixel_values)
+        self.write_img()   
         return None
 
-    def increase_blues(self):
-        """
-            Increases the value of the blues in the image
-        """
+    def blur(self):
         return None
 
 if __name__ == "__main__":
 
     my_image = Image.open('my_image.jpg', 'r')
     img_scrmbler = ImageScrambler(my_image)
-    img_scrmbler.make_black()
-
+    img_scrmbler.increase_color("B")
+    img_scrmbler.make_white()
