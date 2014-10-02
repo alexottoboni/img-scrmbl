@@ -1,4 +1,5 @@
 import sys
+import argparse
 from PIL import Image
 
 class ImageScrambler:
@@ -41,32 +42,43 @@ class ImageScrambler:
         """
         
         """
-        new_pixel_values = []
+        first_half = []
+        second_half = []
         pixel_values = self.get_pixel_list()
-        for i in range(0, len(pixel_values), 2):
-            if (i == len(pixel_values) - 1):
-                new_pixel_values.append(pixel_values[i])
+        for i in range(len(pixel_values)):
+            if (i < len(pixel_values)/2):
+                first_half.append(pixel_values[i])
             else:
-                curR = pixel_values[i][0]
-                curG = pixel_values[i][1]
-                curB = pixel_values[i][2]
-            
-                nextR = pixel_values[i+1][0]
-                nextG = pixel_values[i+1][1]
-                nextB = pixel_values[i+1][2]
-            
-                new_pixel_values.append((nextR, nextG, nextB))
-                new_pixel_values.append((curR, curG, curB))
-
+                second_half.append(pixel_values[i])
+        combined = []        
+        while first_half and second_half:
+            combined.append(first_half.pop())
+            combined.append(second_half.pop())
         self.img = Image.new(self.img.mode, self.img.size)
-        self.img.putdata(new_pixel_values)
-            
+        self.img.putdata(combined) 
+        
         return None    
        
     def unscramble(self):
         """
 
         """
+        pixel_values = self.get_pixel_list()
+        first_half = []
+        second_half = []
+        for i in range(len(pixel_values)):
+            if not (i % 2):
+                first_half.append(pixel_values[i])
+            else:
+                second_half.append(pixel_values[i])
+        combined = []
+        while first_half:
+            combined.append(first_half.pop())
+        while second_half:    
+            combined.append(second_half.pop())
+        self.img = Image.new(self.img.mode, self.img.size)
+        self.img.putdata(combined)
+
         return None
     
     def make_white(self):
@@ -76,7 +88,6 @@ class ImageScrambler:
         pixel_values = self.get_pixel_list()
         for i in range(len(pixel_values)):
             pixel_values[i] = (255,255,255)
-        self.img = Image.new(self.img.mode, self.img.size)
         self.img.putdata(pixel_values)
         return None
 
@@ -87,7 +98,6 @@ class ImageScrambler:
         pixel_values = self.get_pixel_list()
         for i in range(len(pixel_values)):
             pixel_values[i] = (0,0,0)
-        self.img = Image.new(self.img.mode, self.img.size)
         self.img.putdata(pixel_values)
         return None
 
@@ -106,7 +116,6 @@ class ImageScrambler:
             else:
                 print "Not a valid color value"
             pixel_values[i] = (r_value, g_value, b_value)
-        self.img = Image.new(self.img.mode, self.img.size)
         self.img.putdata(pixel_values)   
         return None
 
@@ -115,13 +124,22 @@ class ImageScrambler:
 
 if __name__ == "__main__":
 
-    if len(sys.argv) == 1:
-         my_image = Image.open('my_image.jpg', 'r')
-    elif len(sys.argv) == 2:
-        my_image = Image.open(sys.argv[1])
+    arg_parse = argparse.ArgumentParser()
+    arg_parse.add_argument('-f', nargs = 1, default = "my_image.jpg")
+    arg_parse.add_argument('-s', nargs='?', const="false", default = False)
+    arg_parse.add_argument('-u', nargs='?', const="false", default = False)
+
+    options = arg_parse.parse_args()    
+
+    if isinstance(options.f, list):
+        my_image = Image.open(options.f[0], 'r')
     else:
-        raise ValueError()
-    my_image = Image.open('my_image.jpg', 'r')
+        my_image = Image.open(options.f, 'r')
     img_scrmbler = ImageScrambler(my_image)
-    img_scrmbler.scramble()
+
+    if options.u:
+        img_scrmbler.unscramble()
+    if options.s:
+        img_scrmbler.scramble()
+    
     img_scrmbler.write()
